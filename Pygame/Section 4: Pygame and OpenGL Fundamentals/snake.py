@@ -1,4 +1,5 @@
 import pygame
+import sys
 import time
 import random
 
@@ -9,6 +10,12 @@ display_width = 800
 display_height = 600
 
 gameScreen = pygame.display.set_mode((display_width, display_height)); # Height and Width in a tuple
+
+# Font Mesurements
+font = pygame.font.SysFont(None, 25)
+small_font = pygame.font.SysFont("comicsansms", 25)
+medium_font = pygame.font.SysFont("comicsansms", 40)
+large_font = pygame.font.SysFont("comicsansms", 80)
 
 
 # Snake Position
@@ -27,23 +34,79 @@ fps = 15
 white = (255, 255, 255)
 black = (0, 0, 0)
 red = (255, 0, 0)
-green = (0,155,0)
+green = (0, 155, 0)
+purple = (128, 0, 128)
 
 pygame.display.set_caption("Old Snake"); #Set Title
 
+# Create Icon
+icon = pygame.image.load('/Users/Andy/Developer/Bootcamps/Pygame/Section 4: Pygame and OpenGL Fundamentals/snake_icon2.png')
+pygame.display.set_icon(icon)
+
+# Adding an image
+# img = pygame.image.load('fullpath/imagename.png')
+
+
+def game_intro():
+    intro = True
+
+    while intro == True:
+        gameScreen.fill(white)
+        message_to_screen("Welcome", purple, -100, size="large")
+        message_to_screen("You should aim to eat as many apples as possible!", black, -50, size="medium")
+        message_to_screen("Hope you enjoy!", black, 10, size="small")
+        message_to_screen("Press Space to Start game or Q to Quit", black, 100, size="medium")
+
+        pygame.display.update()
+        clock.tick(15)
+
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.type == pygame.QUIT:
+                    intro = False
+                if event.key == pygame.K_q:
+                    
+                    intro = False
+                
+
+                if event.key == pygame.K_SPACE:
+                    intro = False
+                    game_loop()
+    pygame.quit()
+
+
+def score(score):
+    text = small_font.render("Score is: " + str(score), True, white)
+    gameScreen.blit(text,[0,0])
+
+
+def text_objects(text, colour, size):
+    if size == "small":
+        textSurface = small_font.render(text, True, colour)
+    elif size == "medium":
+        textSurface = medium_font.render(text, True, colour)
+    elif size == "large":
+        textSurface = large_font.render(text, True, colour)
+
+    return textSurface, textSurface.get_rect()
+
+
 # Message to the screen
-def message_to_screen(msg,type):
-    font = pygame.font.SysFont(None,25)
-    screen_text = font.render(msg,True,type)
-    gameScreen.blit(screen_text,[display_width/2,display_height/2])
+def message_to_screen(msg, colour, y_displace = 0, size = "small"):
+    textsurf, textRect = text_objects(msg,colour,size)
 
-def our_snake(size_of_block,snake_list):
-    for XY in snake_list:
+    textRect.center = (display_width/2), (display_height/2) + y_displace
+    gameScreen.blit(textsurf, textRect)
+
+
+def our_snake(size_of_block, snake_list):
+    #gameScreen.blit(img,(snake_list[-1][0],snake_list[-1][1])) # Adds snake head image to the snake
+    for XY in snake_list:  # to assogn values to all minus the head is: snake_list[:-1]
         pygame.draw.rect(gameScreen,green,[XY[0],XY[1],size_of_block,size_of_block])
-    
-    
 
 
+
+# Main Game Loop
 def game_loop():
     gameClose = False
     game_over = False
@@ -63,7 +126,8 @@ def game_loop():
     while not gameClose:
         while game_over == True:
             gameScreen.fill(white)
-            message_to_screen("Game Over! Press Space to play again or Q to quit!",red)
+            message_to_screen("Game Over!",red,-50,size="large")
+            message_to_screen("Press Space to play again or Q to quit!",black,50,size="medium")
             pygame.display.update()
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
@@ -95,11 +159,6 @@ def game_loop():
                     lead_y_change = steps
                     lead_x_change = 0
 
-            
-                
-
-
-
         if lead_x >= 800 or lead_x < 10 or lead_y >= 600 or lead_y < 0:
             game_over = True
 
@@ -127,6 +186,7 @@ def game_loop():
         
 
         our_snake(size_of_block, snake_list)
+        score(snake_length-1)
         pygame.display.update()  # Update the screen
         
         if lead_x == rand_apple_x and lead_y == rand_apple_y:
@@ -134,6 +194,7 @@ def game_loop():
             rand_apple_y = round(random.randrange(0, display_height - size_of_block)/10.0)*10.0
 
             snake_length += 1
+
         clock.tick(fps)  # frame per second
     
     pygame.quit()
@@ -143,5 +204,6 @@ def game_loop():
     time.sleep(2)
     pygame.quit()
 '''
-game_loop()
-#quit()
+
+game_intro()
+#game_loop()
